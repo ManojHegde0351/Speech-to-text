@@ -3,7 +3,7 @@
 Web app that transcribes live speech, including Hindi and English mixed in one sentence, plus Kannada, Tamil, Telugu, Malayalam, Marathi, Bengali, Gujarati, Punjabi and Urdu. Every transcription can be saved to a PostgreSQL database and managed from a dashboard with full CRUD.
 
 **Live demo:** <(https://speech-to-text-mu-flax.vercel.app/)>
-**Code:** <paste your GitHub repo link here>
+**Code:** <[paste your GitHub repo link here](https://github.com/ManojHegde0351/Speech-to-text.git)>
 
 
 
