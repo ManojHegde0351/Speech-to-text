@@ -1,50 +1,85 @@
-# Speech to Text (Hindi + English)
+# Speech to Text (Hindi, English and Indian languages)
 
-Web app that transcribes live speech, including Hindi and English mixed in one sentence, and stores every transcription in PostgreSQL. A dashboard shows the history with full CRUD.
+Web app that transcribes live speech, including Hindi and English mixed in one sentence, plus Kannada, Tamil, Telugu, Malayalam, Marathi, Bengali, Gujarati, Punjabi and Urdu. Every transcription can be saved to a PostgreSQL database and managed from a dashboard with full CRUD.
 
-**Stack:** Node.js, Express, PostgreSQL, vanilla JS frontend. Speech model: open-source **Whisper large-v3**.
+**Live demo:** <(https://speech-to-text-mu-flax.vercel.app/)>
+**Code:** <paste your GitHub repo link here>
+
+
+
+## Features
+
+- **Near real-time transcription:** speak and text appears every few seconds.
+- **Multilingual:** Hinglish mode (Hindi words in Roman script), Auto-detect for mixed languages, or pick a specific language to get text in its own script.
+- **Dashboard (CRUD):** save transcriptions, search them, edit them, create new ones by hand, and delete them.
+- **Speak back:** reads the text aloud in the right voice for each script, even when one text mixes scripts (for example Kannada plus English).
+- **Welcome screen and tips:** animated first-visit guide and short instruction pop-ups. The "How it works" button reopens the guide.
+- **Light and dark mode**, and reduced-motion support.
+
+## Tech stack
+
+| Part | Choice |
+|---|---|
+| Backend | Node.js, Express |
+| Database | PostgreSQL (Neon in production) |
+| Speech to text | Open-source Whisper large-v3 via an OpenAI-compatible API (Groq) |
+| Text to speech | Browser built-in voices (Web Speech API) |
+| Frontend | Plain HTML, CSS and JavaScript (`public/`) |
+| Hosting | Vercel |
 
 ## How it works
 
 ```
-Browser mic ──(4s audio segments)──▶ POST /api/transcribe ──▶ Whisper (OpenAI-compatible API)
+Browser mic ──(4s audio segments)──▶ POST /api/transcribe ──▶ Whisper
      ▲                                        │
      └──────────── text appended live ◀───────┘
 Save ──▶ POST /api/transcriptions ──▶ PostgreSQL ◀── Dashboard (list / search / edit / delete)
 ```
 
-- The browser records with `MediaRecorder`, cutting the audio every 4 seconds so each piece is a valid file, and sends them in order. Text shows up a few seconds after you speak.
-- Segments that are silent are skipped in the browser, and segments Whisper flags as no-speech are dropped on the server. This stops "ghost" text.
-- The speech service is just an OpenAI-compatible `/audio/transcriptions` endpoint, so you can switch between a hosted Whisper (Groq) and a self-hosted one by changing env vars only.
-- **Language modes:** *Hinglish* (Hindi words in Roman script, the default), *Auto-detect*, *Hindi*, *English*.
+- The browser records with `MediaRecorder` and cuts the audio every 4 seconds, so each piece is a valid file. Pieces are sent in order, so the text stays in order.
+- Silent segments are skipped in the browser, and segments Whisper marks as no-speech are dropped on the server. This avoids made-up text.
+- The speech service is any OpenAI-compatible `/audio/transcriptions` endpoint. Switching between hosted Whisper (Groq) and a self-hosted Whisper server only needs environment variables.
+- The `transcriptions` table is created automatically on the first request.
+
+## Project structure
+
+```
+server.js          Express API and speech proxy
+db.js              PostgreSQL connection and table setup
+public/
+  index.html       page structure
+  style.css        all styling and animations (colors and sizes at the top)
+  app.js           recording, speech, welcome screen, dashboard logic
+render.yaml, Dockerfile, docker-compose.yml   optional deploy configs
+```
 
 ## Run locally
 
-Requirements: Node 18+, PostgreSQL, a Groq API key (free at https://console.groq.com) or a self-hosted Whisper server.
+Requirements: Node 18 or newer, PostgreSQL, and a free Groq API key from https://console.groq.com.
 
 ```bash
-git clone <your-repo-url> && cd speech-to-text
+git clone <your-repo-url>
+cd speech-to-text
 npm install
-cp .env.example .env          # then fill in DATABASE_URL and STT_API_KEY
+cp .env.example .env          # Windows PowerShell: copy .env.example .env
 createdb speech_to_text
 npm start                     # http://localhost:3000
 ```
 
-The `transcriptions` table is created automatically on first start.
+Edit `.env` with your own values. Browsers only allow microphone access on `localhost` or HTTPS.
 
 With Docker instead: `STT_API_KEY=your_key docker compose up --build`
 
-Browsers only allow microphone access on `localhost` or HTTPS.
+## Environment variables
 
-## Self-hosting Whisper (no third-party API)
-
-Run any OpenAI-compatible Whisper server (for example a faster-whisper server container) and point the app at it:
-
-```
-STT_BASE_URL=http://localhost:8000/v1
-STT_API_KEY=
-STT_MODEL=Systran/faster-whisper-small
-```
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `DATABASE_SSL` | `true` for hosted databases such as Neon, `false` locally |
+| `STT_API_KEY` | API key for the Whisper service (Groq) |
+| `STT_BASE_URL` | Optional. Defaults to `https://api.groq.com/openai/v1` |
+| `STT_MODEL` | Optional. Defaults to `whisper-large-v3` |
+| `PORT` | Optional. Local port, defaults to 3000 |
 
 ## API
 
@@ -56,19 +91,37 @@ STT_MODEL=Systran/faster-whisper-small
 | POST | `/api/transcriptions` | create `{ title?, text, language?, duration_sec? }` |
 | PUT | `/api/transcriptions/:id` | update `{ title, text, language }` |
 | DELETE | `/api/transcriptions/:id` | delete |
-| GET | `/api/health` | health check (touches the DB) |
+| GET | `/api/health` | health check (touches the database) |
 
-## Deploy (Render)
+## Deploy on Vercel
 
-1. Push this repo to GitHub.
-2. On Render: **New → Blueprint**, select the repo. `render.yaml` creates the web service and a PostgreSQL database and wires `DATABASE_URL`.
-3. Set the `STT_API_KEY` env var when prompted.
-4. Open the Render URL (HTTPS, so the mic works).
+Vercel runs the app as a serverless function and serves `public/` from its CDN. It has no database of its own, so use a hosted PostgreSQL such as Neon.
 
-Any host that runs Node and Postgres works the same way (Railway, Fly.io, Azure, etc.). Set `DATABASE_SSL=true` for hosted databases that require SSL.
+1. Create a Neon project and copy the **pooled** connection string.
+2. Push this repo to GitHub. Never commit `.env`.
+3. On Vercel, import the repo and keep the default build settings.
+4. Add the environment variables `DATABASE_URL`, `DATABASE_SSL=true` and `STT_API_KEY`.
+5. Deploy. Changing a variable later needs a redeploy.
+
+## Self-hosting the speech model
+
+The app only needs an OpenAI-compatible Whisper endpoint. To avoid a third-party API, run your own Whisper server and point the app at it:
+
+```
+STT_BASE_URL=http://localhost:8000/v1
+STT_API_KEY=
+STT_MODEL=<model name your server expects>
+```
+
+The deployed demo uses Groq's hosted Whisper, because free hosting tiers cannot run the model.
 
 ## Known limitations
 
-- Near real-time, not word-by-word streaming: expect a delay of a few seconds. A word spoken exactly at a segment boundary can be split or missed. Overlapping segments or a streaming (WebSocket) pipeline would improve this.
-- Whisper may write Hindi in Devanagari in Auto mode. Use *Hinglish* mode for Roman script.
-- No user accounts: all history is shared. Add auth before using with real data.
+- **Not word-by-word streaming:** expect a delay of a few seconds. A word spoken exactly at a segment boundary can be split or missed. Overlapping segments or a WebSocket streaming pipeline would improve this.
+- **Accuracy varies by language:** Whisper is strongest on English and Hindi, and weaker on Kannada, Tamil, Telugu and Malayalam. With one fixed language selected, English words in the middle of a sentence may come out garbled, so use Auto-detect for mixed speech.
+- **Voices depend on the device:** speaking back uses voices installed on the device. If a language has no voice, the app shows a message and falls back to the default voice.
+- **No user accounts:** all saved history is shared. Add authentication before using it with real data.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
