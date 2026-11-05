@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speech to Text</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="welcome" class="welcome" role="dialog" aria-modal="true" aria-labelledby="wTitle">
+  <div class="welcome-fx" aria-hidden="true">
+    <div class="welcome-bg"></div>
+    <div class="floaters" id="floaters"></div> 
+  </div>
+  <div class="welcome-inner">
+    <div class="welcome-mic rise-in" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+    </div>
+    <h1 id="wTitle" class="rise-in" style="--d:1">Speak. We'll write it down.</h1>
+    <p class="welcome-sub rise-in" style="--d:2">Live speech to text for Hindi, English, Kannada, Tamil, Telugu and more.</p>
+    <ol class="steps">
+      <li class="rise-in" style="--d:3">
+        <span class="num">1</span>
+        <div><b>Pick your language</b><small>Choose it from the dropdown before you start. Use Auto-detect if you mix languages.</small></div>
+      </li>
+      <li class="rise-in" style="--d:4">
+        <span class="num">2</span>
+        <div><b>Tap the mic and speak</b><small>Allow the microphone when your browser asks. Text appears every few seconds.</small></div>
+      </li>
+      <li class="rise-in" style="--d:5">
+        <span class="num">3</span>
+        <div><b>Review, save and listen back</b><small>Edit the text, save it to your history, or tap Speak back to hear it.</small></div>
+      </li>
+    </ol>
+    <button id="startBtn" class="primary big" type="button">Get started</button>
+    <p class="welcome-note rise-in" style="--d:7">We don't store your audio, only the text you choose to save.</p>
+  </div>
+</div>
+
+<main>
+  <header class="top">
+    <div>
+      <h1>Speech to Text</h1>
+      <p class="sub">Speak in Hindi, English, Kannada or another Indian language. Text appears every few seconds.</p>
+    </div>
+    <button id="guideBtn" type="button" class="ghost">How it works</button>
+  </header>
+
+  <section class="card stage" id="stage">
+    <div class="stage-top">
+      <select id="lang" title="Language mode">
+ 
+        <option value="hinglish">Hinglish (Roman script)</option>
+        <option value="auto">Auto-detect (mixed languages)</option>
+        <option value="hi">Hindi</option>
+        <option value="en">English</option>
+        <option value="kn">Kannada</option>
+        <option value="ta">Tamil</option>
+        <option value="te">Telugu</option>
+        <option value="ml">Malayalam</option>
+        <option value="mr">Marathi</option>
+        <option value="bn">Bengali</option>
+        <option value="gu">Gujarati</option>
+        <option value="pa">Punjabi</option>
+        <option value="ur">Urdu</option>
+      </select>
+      <span id="timer" class="status">0:00</span>
+    </div>
+    <div class="mic-wrap">
+      <button id="recBtn" class="mic" aria-label="Start recording">
+        <svg class="ico-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+        <svg class="ico-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>
+      </button>
+    </div>
+    <div class="wave" id="wave" aria-hidden="true"></div>
+    <p id="status" class="status" aria-live="polite">Tap the mic to start</p>
+    <p id="latest" class="latest"></p>
+    <textarea id="live" placeholder="Your transcription will appear here. You can edit it before saving."></textarea>
+    <div class="row" style="margin-top:12px">
+      <button id="speakBtn" disabled>▶ Speak back</button>
+      <label class="status"><input type="checkbox" id="autoSpeak" checked> Read aloud when I stop recording</label>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <input id="title" type="text" class="grow" maxlength="200" placeholder="Title (optional)">
+      <button id="saveBtn" class="primary" disabled>Save to history</button>
+      <button id="clearBtn">Clear</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <h2 class="grow">History <span id="count" class="status"></span></h2>
+      <input id="search" type="search" placeholder="Search…">
+      <button id="newBtn">+ New</button>
+    </div>
+    <table>
+      <thead><tr><th>Title</th><th>Transcript</th><th>Mode</th><th>Created</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog" id="dlgForm">
+    <h2 id="dlgTitle">Edit transcription</h2>
+    <label for="dTitle">Title</label>
+    <input id="dTitle" type="text" maxlength="200">
+    <label for="dLang">Mode</label>
+    <select id="dLang"></select>  
+    <label for="dText">Transcript</label>
+    <textarea id="dText" style="margin-top:0"></textarea>
+    <div class="row" style="margin-top:14px; justify-content:flex-end">
+      <button type="button" id="dCancel">Cancel</button>
+      <button type="submit" class="primary" id="dSave">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>   
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,836 @@
+
+
+:root {
+  /* Colors (light mode) */
+  --bg: #f6f7f9;       
+  --card: #fff;           
+  --ink: #16181d;           
+  --muted: #667085;    
+  --line: #e4e7ec;          
+  --brand:#61f65c;         
+  --brand-ink: #fff;        
+  --danger: #d92d20;        
+
+  /* Gradient helper colors */
+  --brand-2: #61f65c;      
+  --brand-3: #61f65c;       
+  --danger-2: #ff8a5c;    
+
+  /* Shape */
+  --radius-card: 12px;     
+  --radius-control: 8px;   
+  --radius-pill: 99px;      
+
+  /* Layout */
+  --page-width: 980px;
+
+  /* Typography */
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-size: 15px;
+
+  /* Speech panel sizes */
+  --mic-size: 84px;         
+  --mic-icon-size: 34px;
+  --mic-area-height: 150px; 
+  --wave-height: 56px;
+  --bar-width: 4px;         
+  --bar-gap: 4px;
+
+  /* Animation speeds */
+  --speed-breathe: 3.2s;   
+  --speed-ring: 1.8s;      
+  --speed-aura: 3s;         
+  --speed-idle-wave: 2.4s;  
+  --wave-stagger: 80ms;     
+}
+
+/* Dark mode: only the colors change */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --card: #171a21;
+    --ink: #e8eaee;
+    --muted: #9aa3b2;
+    --line: #2a2f3a;
+    --brand: #61f65c;
+    --brand-ink: #0f1115;
+    --danger: #ff6b60;
+  }
+}
+
+
+/* ==========================================================================
+   2. Base
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: var(--font-size)/1.5 var(--font);
+}
+
+h1 {
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+
+h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.sub {
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+
+/* ==========================================================================
+   3. Layout
+   ========================================================================== */
+
+main {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.grow {
+  flex: 1;
+}
+
+.top {                     
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+
+/* ==========================================================================
+   4. Buttons and form controls
+   ========================================================================== */
+
+button {
+  font: inherit;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  padding: 8px 14px;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--brand);
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-color: var(--brand);
+}
+
+button.danger {
+  color: var(--danger);
+}
+
+button.ghost {              
+  background: transparent;
+  color: var(--muted);
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  padding: 8px 10px;
+}
+
+input[type=text],
+input[type=search] {
+  min-width: 0;
+}
+
+textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  margin-top: 12px;
+}
+
+
+/* ==========================================================================
+   5. Speech panel
+   ========================================================================== */
+
+
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 20px 16px 16px;
+}
+
+.stage > * {
+  position: relative;      
+}
+
+.stage::before {           
+  content: "";
+  position: absolute;
+  inset: -45% -10% auto -10%;
+  height: 85%;
+  pointer-events: none;
+  opacity: .6;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--brand) 20%, transparent), transparent);
+  transition: opacity .4s;
+}
+
+.stage.recording::before {
+  opacity: 1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--danger) 22%, transparent), transparent);
+  animation: aura var(--speed-aura) ease-in-out infinite;
+}
+
+
+
+.stage-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+#timer {
+  font-variant-numeric: tabular-nums;  
+}
+
+
+
+.mic-wrap {
+  display: grid;
+  place-items: center;
+  height: var(--mic-area-height);
+}
+
+.mic {
+  position: relative;
+  width: var(--mic-size);
+  height: var(--mic-size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--brand-ink);
+  background: linear-gradient(145deg, var(--brand), color-mix(in srgb, var(--brand) 55%, var(--brand-2)));
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand) 40%, transparent);
+  transition: transform .2s, background .3s;
+  animation: breathe var(--speed-breathe) ease-in-out infinite;
+}
+
+.mic:hover:not(:disabled) {
+  transform: scale(1.07);
+}
+
+.mic:active {
+  transform: scale(.94);
+}
+
+.mic svg {
+  width: var(--mic-icon-size);
+  height: var(--mic-icon-size);
+}
+
+.mic .ico-stop {           
+  display: none;
+  width: calc(var(--mic-icon-size) - 4px);
+  height: calc(var(--mic-icon-size) - 4px);
+}
+
+.mic::before,              
+.mic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--danger);
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+.stage.recording .mic {
+  background: linear-gradient(145deg, var(--danger), var(--danger-2));
+  color: #fff;
+  animation: none;
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--danger) 50%, transparent);
+}
+
+.stage.recording .mic .ico-mic {
+  display: none;
+}
+
+.stage.recording .mic .ico-stop {
+  display: block;
+}
+
+.stage.recording .mic::before {
+  animation: ring var(--speed-ring) ease-out infinite;
+}
+
+.stage.recording .mic::after {
+  animation: ring var(--speed-ring) ease-out calc(var(--speed-ring) / 2) infinite;
+}
+
+
+
+.wave {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--bar-gap);
+  height: var(--wave-height);
+}
+
+.wave i {
+  display: block;
+  width: var(--bar-width);
+  height: 6px;           
+  border-radius: 3px;
+  opacity: .45;
+  background: linear-gradient(var(--brand), color-mix(in srgb, var(--brand) 50%, var(--brand-3)));
+  transition: height .09s ease-out, opacity .3s;
+  animation: idlebar var(--speed-idle-wave) ease-in-out infinite;
+  animation-delay: calc(var(--i) * var(--wave-stagger));   
+}
+
+.stage.recording .wave i {
+  animation: none;        
+  opacity: 1;
+}
+
+
+
+#status {
+  min-height: 20px;
+  margin: 6px 0 0;
+}
+
+.stage.busy #status::after {           
+  content: " ●●●";
+  letter-spacing: 2px;
+  animation: dots 1.2s infinite;
+}
+
+.latest {                
+  min-height: 26px;
+  margin: 10px 0 0;
+  font-size: 17px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.latest.pop {
+  animation: rise .35s ease-out;
+}
+
+.stage textarea {
+  text-align: left;
+}
+
+
+/* ==========================================================================
+   6. History table
+   ========================================================================== */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+
+td.text {                 
+  max-width: 380px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+td.actions {
+  white-space: nowrap;
+}
+
+td.actions button {         
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.tag {                     
+  font-size: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+  color: var(--muted);
+}
+
+.empty {                   
+  color: var(--muted);
+  text-align: center;
+  padding: 28px 0;
+}
+
+
+/* ==========================================================================
+   7. Edit dialog
+   ========================================================================== */
+
+dialog {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  color: var(--ink);
+  width: min(560px, 92vw);
+  padding: 18px;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, .4);
+}
+
+dialog label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 12px 0 4px;
+}
+
+dialog input[type=text],
+dialog select {
+  width: 100%;
+}
+
+
+/* ==========================================================================
+   8. Welcome screen
+   ========================================================================== */
+
+.welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  padding: 24px;
+  overflow-y: auto;
+  background: var(--bg);
+  transition: opacity .5s, transform .5s, visibility .5s;
+}
+
+.welcome[hidden] {
+  display: none;
+}
+
+.welcome.leaving {         
+  opacity: 0;
+  transform: scale(1.04);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.welcome-fx {              
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.welcome-bg {              
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(40% 40% at 20% 25%, color-mix(in srgb, var(--brand) 28%, transparent), transparent),
+    radial-gradient(35% 35% at 80% 70%, color-mix(in srgb, var(--brand-2) 28%, transparent), transparent);
+  animation: drift 14s ease-in-out infinite alternate;
+}
+
+.floaters span {           
+  position: absolute;
+  left: var(--x);
+  bottom: -10%;
+  font-size: var(--s);
+  color: var(--brand);
+  white-space: nowrap;
+  opacity: 0;
+  animation: floatup var(--dur) linear var(--delay) infinite;
+}
+
+.welcome-inner {
+  position: relative;
+  width: min(560px, 100%);
+  margin: auto;            
+  text-align: center;
+}
+
+.rise-in {              
+  animation: pop-in .6s ease-out both;
+  animation-delay: calc(var(--d, 0) * 120ms);
+}
+
+.welcome-mic {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--brand-ink);
+  background: linear-gradient(145deg, var(--brand), color-mix(in srgb, var(--brand) 55%, var(--brand-2)));
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--brand) 45%, transparent);
+}
+
+.welcome-mic svg {
+  width: 38px;
+  height: 38px;
+}
+
+.welcome-mic::before,     
+.welcome-mic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--brand);
+  animation: ring 2.4s ease-out infinite;
+}
+
+.welcome-mic::after {
+  animation-delay: 1.2s;
+}
+
+.welcome h1 {
+  font-size: clamp(28px, 6vw, 40px);
+  line-height: 1.15;
+  margin: 0 0 8px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.welcome-sub {
+  color: var(--muted);
+  font-size: 16px;
+  margin: 0;
+}
+
+.steps {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0;
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+
+.steps li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(6px);
+}
+
+.steps .num {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.steps b {
+  display: block;
+}
+
+.steps small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.welcome .big {          
+  padding: 12px 30px;
+  font-size: 16px;
+  border-radius: var(--radius-pill);
+  animation: pop-in .6s ease-out 720ms both, glow 2.4s ease-in-out 1.4s infinite;
+}
+
+.welcome-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 14px 0 0;
+}
+
+main.in {               
+  animation: pop-in .5s ease-out both;
+}
+
+
+/* ==========================================================================
+   9. Notifications (tip toasts)
+   
+   ========================================================================== */
+
+.toasts {
+  position: fixed;
+  z-index: 90;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(360px, calc(100vw - 32px));
+  pointer-events: none;     
+}
+
+.toast {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--brand);
+  border-radius: var(--radius-control);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+  pointer-events: auto;
+  animation: toast-in .35s cubic-bezier(.2, .9, .3, 1.2) both;
+}
+
+.toast.leaving {
+  animation: toast-out .25s ease-in forwards;
+}
+
+.toast.warn {
+  border-left-color: var(--danger);
+}
+
+.toast-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.toast.warn .toast-icon {
+  background: var(--danger);
+  color: #fff;
+}
+
+.toast b {
+  display: block;
+}
+
+.toast p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.toast .x {                 
+  margin-left: auto;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.toast::after {            
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--brand);
+  opacity: .5;
+  transform-origin: left;
+  animation: toast-timer var(--life, 7s) linear forwards;
+}
+
+.toast.warn::after {
+  background: var(--danger);
+}
+
+
+/* ==========================================================================
+  10. Animations
+   ========================================================================== */
+
+@keyframes breathe {       
+  0%, 100% { box-shadow: 0 8px 24px color-mix(in srgb, var(--brand) 35%, transparent); }
+  50%      { box-shadow: 0 8px 40px color-mix(in srgb, var(--brand) 65%, transparent); }
+}
+
+@keyframes ring {          
+  0%   { transform: scale(1);   opacity: .7; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+
+@keyframes aura {          
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.12); }
+}
+
+@keyframes idlebar {        
+  0%, 100% { height: 6px; }
+  50%      { height: 16px; }
+}
+
+@keyframes rise {           
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes dots {           
+  0%, 80%, 100% { opacity: .2; }
+  40%           { opacity: 1; }
+}
+
+
+@keyframes pop-in {       
+  from { opacity: 0; transform: translateY(18px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes drift {         
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(4%, 3%) scale(1.12); }
+}
+
+@keyframes floatup {       
+  0%   { transform: translateY(0); opacity: 0; }
+  10%  { opacity: .35; }
+  90%  { opacity: .35; }
+  100% { transform: translateY(-110vh); opacity: 0; }
+}
+
+@keyframes glow {         
+  0%, 100% { box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 35%, transparent); }
+  50%      { box-shadow: 0 6px 30px color-mix(in srgb, var(--brand) 65%, transparent); }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(40px) scale(.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes toast-out {
+  to { opacity: 0; transform: translateX(40px); }
+}
+
+@keyframes toast-timer {   
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+
+/* ==========================================================================
+  11. Responsive and accessibility
+   ========================================================================== */
+
+
+@media (max-width: 640px) {
+  th:nth-child(3), td:nth-child(3),
+  th:nth-child(4), td:nth-child(4) {
+    display: none;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .stage *,
+  .stage *::before,
+  .stage *::after,
+  .stage::before,
+  .welcome *,
+  .welcome *::before,
+  .welcome *::after,
+  .welcome::before,
+  main.in,
+  .toast,
+  .toast::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
